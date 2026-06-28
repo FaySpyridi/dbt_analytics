@@ -1,0 +1,64 @@
+name: 'yodeck_analytics'
+version: '1.0.0'
+config-version: 2
+ 
+profile: 'yodeck_analytics'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+data_tests:
+  +severity: warn
+
+models:
+  yodeck_analytics:
+    +persist_docs:
+      relation: true
+      columns: true
+
+    # Bronze: 1:1 with the source, renamed/typed only. No business logic.
+    staging:
+      +schema: staging
+      +materialized: view
+      +meta: {
+          'frequency': 'daily', 
+          'internal_use_only': 'true', 
+          'layer': 'bronze', 
+          'product': 'yodeck', 
+          'purpose': 'staging'
+      }
+
+    # Silver: cleaned, conformed, business-logic building blocks meant to be
+    # reused by more than one mart (and by future marts not built yet).
+    intermediate:
+      +schema: intermediate
+      +materialized: view
+      +meta: {
+          'frequency': 'daily', 
+          'internal_use_only': 'true', 
+          'layer': 'silver', 
+          'product': 'yodeck', 
+          'purpose': 'analytics'
+      }
+
+    # Gold: the only layer BI is allowed to query. Reusable grains, no
+    # report-shaped/aggregated-for-a-specific-dashboard logic lives here.
+    marts:
+       +schema: marts
+       +materialized: table
+       +meta: {
+         'frequency': 'daily', 
+         'internal_use_only': 'true', 
+         'layer': 'gold', 
+         'product': 'yodeck', 
+         'purpose': 'analytics'
+        }
