@@ -1,0 +1,46 @@
+models:
+  - name: fct_account_monthly_mrr
+    description: >
+      Gold layer account-month MRR fact. One row per account per month,
+      carrying current_mrr, previous_mrr, signed mrr_change, and a
+      mrr_movement_category.
+    columns:
+      - name: account_id
+        description: "{{ doc('account_id') }}"
+        data_tests:
+          - not_null
+
+      - name: month_start
+        description: First day of the month this snapshot applies to.
+
+      - name: month_end
+        description: Last day of the month this snapshot applies to.
+
+      - name: current_mrr
+        description: Total MRR for this account at the end of this month.
+
+      - name: previous_mrr
+        description: Total MRR for this account at the end of the previous month.
+
+      - name: mrr_change
+        description: current_mrr - previous_mrr. Net MRR change for the month sums this column.
+
+      - name: mrr_movement_category
+        description: "Classification of this month's MRR change: new, expansion, contraction, churned, reactivated, retained, or no_activity."
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - account_id
+            - month_start
+
+      # Check total mmr
+      - dbt_expectations.expect_table_aggregation_to_equal_other_table:
+          arguments:
+            expression: "coalesce(sum(current_mrr), 0)"
+            compare_model: ref("fct_subscription")
+            compare_expression: "coalesce(sum(mrr_amount), 0)"
+            row_condition: month_start = date_trunc('month', current_date)
+            compare_row_condition: (is_active or end_date is null or end_date > {{ dbt_utils.last_day('current_date', 'month') }})
+            tolerance_percent: 0.001
+          name: compare_sum_total_mmr_fct_account_monthly_mrr_vs_fct_subscription

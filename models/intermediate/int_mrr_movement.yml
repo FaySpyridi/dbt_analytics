@@ -1,0 +1,43 @@
+models:
+  - name: int_mrr_movement
+    description: >
+      Account-month grain. Classifies each month's MRR change for each
+      account into new/expansion/contraction/churned/reactivated/retained/
+      no_activity per the assignment glossary, with a signed mrr_change so
+      that summing mrr_change across all accounts in a month reconciles to
+      that month's net MRR change.
+    columns:
+      - name: account_id
+        description: "{{ doc('account_id') }}"
+
+      - name: month_start
+        description: First day of the month this row applies to.
+
+      - name: current_mrr
+        description: Total MRR for this account at the end of this month.
+
+      - name: previous_mrr
+        description: Total MRR for this account at the end of the previous month.
+
+      - name: mrr_change
+        description: current_mrr - previous_mrr. Net MRR change for the month sums this column.
+
+      - name: mrr_movement_category
+        description: Classification of this month's MRR change: new, expansion, contraction, churned, reactivated, retained, or no_activity.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - new
+                - expansion
+                - contraction
+                - churned
+                - reactivated
+                - retained
+                - no_activity
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - account_id
+            - month_start

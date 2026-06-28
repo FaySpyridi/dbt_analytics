@@ -1,0 +1,44 @@
+models:
+  - name: fct_subscription
+    description: >
+      Gold layer subscription-grain fact. One row per subscription record.
+      An account can have multiple rows over time (and, where periods
+      overlap, multiple simultaneously-active rows).
+    columns:
+      - name: subscription_id
+        description: "{{ doc('subscription_id') }}"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: account_id
+        description: "{{ doc('account_id') }}"
+
+      - name: plan_name
+        description: "Plan tier: starter, pro, enterprise."
+
+      - name: plan_interval
+        description: "Billing frequency: monthly, annual."
+
+      - name: plan_price
+        description: The price charged for this subscription in USD.
+
+      - name: mrr_amount
+        description: plan_price normalized to a monthly amount.
+
+      - name: start_date
+        description: When this subscription period started.
+
+      - name: end_date
+        description: When this subscription period ended. Null if still active.
+
+      - name: cancelled_at
+        description: When the cancellation was made. Informational only — see README Assumption #4.
+
+      - name: is_active
+        description: >
+          True when end_date is null and cancelled_at is null, per the
+          assignment glossary's literal definition. A subscription with a
+          known future end_date is not "active" by this flag, even though
+          it still contributes MRR every month up to that date - see
+          fct_account_monthly_mrr.yml's reconciliation test.

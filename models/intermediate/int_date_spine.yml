@@ -1,0 +1,18 @@
+models:
+  - name: int_date_spine
+    description: >
+      One row per calendar month, from the first subscription start_date
+      through the current month. Pure utility model - no business keys -
+      so any future time-series model can reuse it instead of redefining
+      its own date range.
+    columns:
+      - name: month_start
+        description: First day of the month.
+        data_tests:
+          - unique
+          - not_null
+
+      - name: month_end
+        description: Last day of the month.
+        data_tests:
+          - not_null

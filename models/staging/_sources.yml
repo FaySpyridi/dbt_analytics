@@ -1,0 +1,25 @@
+sources:
+  - name: rawdb
+    description: >
+      Raw Yodeck data, loaded as-is from the CSVs provided for this
+      assignment (materialized here as dbt seeds in the `raw` schema, but
+      modelled exactly as a `source` would be in production - i.e. nothing
+      downstream knows or cares that it's a seed). Bronze layer.
+    schema: raw
+    tables:
+      - name: raw_accounts
+        description: Represents companies that have signed up to Yodeck.
+
+      - name: raw_exchange_rates
+        description: >
+          Daily exchange rates to USD for non-USD currencies.
+          USD does not appear in the exchange rates table.
+
+      - name: raw_invoices
+        description: Represents invoices raised against subscriptions.
+
+      - name: raw_subscriptions
+        description: >
+          Represents subscription records for each account. An account can have 
+          multiple subscription records over time, for example when they upgrade, downgrade
+          , cancel, or reactivate.

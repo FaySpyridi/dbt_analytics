@@ -1,0 +1,35 @@
+models:
+  - name: stg_raw_exchange_rates
+    description: Daily exchange rates to USD for non-USD currencies. USD does not appear in the exchange rates table.
+
+    columns:
+      - name: rate_date
+        data_type: date
+        description: The date this rate applies to.
+        data_tests:
+          - not_null
+
+      - name: currency
+        data_type: string
+        description: The source currency (e.g. EUR, GBP).
+        data_tests:
+          - not_null
+
+      - name: rate_to_usd
+        data_type: numeric(12,6)
+        description: Multiplier to convert this currency to USD (e.g. EUR × 1.08 = USD).
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: false
+
+    data_tests:
+       - dbt_utils.unique_combination_of_columns:
+           combination_of_columns:
+             - rate_date
+             - currency
+
+
+
+
+

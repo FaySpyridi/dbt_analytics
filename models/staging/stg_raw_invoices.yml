@@ -1,0 +1,72 @@
+models:
+  - name: stg_raw_invoices
+    description: Represents invoices raised against subscriptions.
+
+    columns:
+      - name: invoice_id
+        data_type: string
+        description: "{{ doc('invoice_id') }}"
+        data_tests:
+          - not_null
+          - unique
+
+      - name: account_id
+        data_type: string
+        description: "{{ doc('account_id') }}"
+        data_tests:
+          - not_null
+          - relationships:
+             to: ref('stg_raw_accounts')
+             field: account_id
+
+      - name: subscription_id
+        data_type: string
+        description: "{{ doc('subscription_id') }}"
+        data_tests:
+          - not_null
+          - relationships:
+             to: ref('stg_raw_subscriptions')
+             field: subscription_id
+
+      - name: amount
+        data_type: numeric(12,6)
+        description: Invoice amount in the currency specified below.
+        data_tests:
+          - dbt_utils.accepted_range:
+             min_value: 0
+             inclusive: false
+
+      - name: currency
+        data_type: string
+        description: Currency of this invoice. Note: not all invoices are in USD.
+        data_tests:
+          - not_null
+
+      - name: invoice_status
+        data_type: string
+        description: Invoice status: paid, pending, failed
+        data_tests:
+          - not_null
+          - accepted_values:
+              name: accepted_values_stg_raw_invoices_invoice_status
+              description: >
+                Accepted values on invoice_status. We want to be informed
+                if a new invoice status is created in order to check if we
+                should adjust our reports.
+              arguments:
+                values: ["paid", "pending", "failed"]
+
+      - name: invoice_date
+        data_type: date
+        description: Date the invoice was raised.
+        data_tests:
+          - not_null
+
+      - name: paid_at
+        data_type: timestamp
+        description: When the invoice was paid. Null if not yet paid.
+
+
+
+
+

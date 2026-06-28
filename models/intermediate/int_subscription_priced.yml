@@ -1,0 +1,64 @@
+models:
+  - name: int_subscription_priced
+    description: >
+      Subscription-grain silver model. Adds normalized monthly MRR
+      (annual plans divided by 12) and an is_active flag. Intentionally
+      kept at subscription grain (not account or account-month) so it can
+      be reused by future models needing subscription-level detail.
+    columns:
+      - name: subscription_id
+        description: Unique identifier for the subscription record.
+        data_tests:
+          - unique
+          - not_null
+
+      - name: account_id
+        description: "{{ doc('account_id') }}"
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('int_account')
+              field: account_id
+
+      - name: plan_name
+        description: "Plan tier: starter, pro, enterprise."
+
+      - name: plan_interval
+        description: "Billing frequency: monthly, annual."
+
+      - name: plan_price
+        description: >
+          The price charged for this subscription in USD. For monthly
+          plans this is the monthly price. For annual plans this is the
+          full annual price.
+
+      - name: mrr_amount
+        description: plan_price normalized to a monthly amount.
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: false
+
+      - name: start_date
+        description: When this subscription period started.
+
+      - name: end_date
+        description: When this subscription period ended. Null if still active.
+
+      - name: cancelled_at
+        description: >
+          When the cancellation was made. Null if not cancelled.
+          Informational only - it does not affect the is_active flag (see
+          its own description for why).
+
+      - name: is_active
+        description: >
+          True when end_date is null and cancelled_at is null, per the
+          assignment glossary's literal definition. A subscription with a
+          known future end_date is not "active" by this flag, even though
+          it still contributes MRR every month up to that date - see
+          fct_account_monthly_mrr.yml's reconciliation test, which
+          accounts for that population explicitly.
+        data_tests:
+          - not_null

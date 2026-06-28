@@ -1,0 +1,25 @@
+models:
+  - name: int_account_months
+    description: >
+      Every account that has ever had a subscription, crossed with every
+      month in int_date_spine. Guarantees $0-MRR months exist as real rows
+      so month-over-month movement logic never has to infer a gap.
+    columns:
+      - name: account_id
+        description: "{{ doc('account_id') }}"
+        data_tests:
+          - not_null
+
+      - name: month_start
+        description: First day of the month this row applies to.
+        data_tests:
+          - not_null
+
+      - name: month_end
+        description: Last day of the month this row applies to.
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - account_id
+            - month_start

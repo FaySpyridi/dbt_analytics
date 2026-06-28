@@ -1,0 +1,21 @@
+models:
+  - name: dim_account
+    description: Gold layer accounts dimension. One row per account.
+    columns:
+      - name: account_id
+        description: "{{ doc('account_id') }}"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: account_name
+        description: "{{ doc('account_name') }}"
+
+      - name: country_code
+        description: "{{ doc('country_code') }}"
+
+      - name: account_created_at
+        description: When the account was first created in the system.
+
+      - name: account_status
+        description: "Current account status: active, cancelled, trial."

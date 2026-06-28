@@ -1,0 +1,79 @@
+models:
+  - name: stg_raw_subscriptions
+    description: >
+      Represents subscription records for each account. An account can have 
+      multiple subscription records over time, for example when they upgrade, downgrade
+      , cancel, or reactivate.
+
+    columns:
+      - name: subscription_id
+        data_type: string
+        description: "{{ doc('subscription_id') }}"
+        data_tests:
+          - not_null
+          - unique
+
+      - name: account_id
+        data_type: string
+        description: "{{ doc('account_id') }}"
+        data_tests:
+          - relationships:
+             to: ref('stg_raw_accounts')
+             field: account_id
+
+      - name: plan_name
+        data_type: string
+        description: Plan tier: starter, pro, enterprise.
+        data_tests:
+           - accepted_values:
+               name: accepted_values_stg_raw_subscriptions_plan_name
+               description: >
+                 Accepted values on plan_name. We want to be informed if a
+                 new plan_name is created in order to check if we should
+                 adjust our reports.
+               arguments:
+                 values: ['starter', 'pro', 'enterprise']
+
+      - name: plan_interval
+        data_type: string
+        description: Billing frequency: monthly, annual
+        data_tests:
+          - not_null
+          - accepted_values:
+              name: accepted_values_stg_raw_subscriptions_plan_interval
+              description: >
+                Accepted values on plan_interval. We want to be informed if
+                a new plan_interval is created in order to check if we
+                should adjust our reports.
+              arguments:
+                values: ["monthly", "annual"]
+
+      - name: plan_price
+        data_type: numeric(12,6)
+        description: >
+          The price charged for this subscription in USD. For monthly
+          plans this is the monthly price. For annual plans this is the
+          full annual price.
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: false
+
+      - name: start_date
+        data_type: date
+        description: When this subscription period started.
+        data_tests:
+          - not_null
+
+      - name: end_date
+        data_type: date
+        description: When this subscription period ended. Null if still active.
+
+      - name: cancelled_at
+        data_type: timestamp
+        description: When the cancellation was made. Null if not cancelled.
+
+
+
+
+

@@ -1,0 +1,58 @@
+models:
+  - name: int_invoice_usd
+    description: >
+      Invoice-grain silver model. Converts amount to USD via the to_usd
+      macro, joined to the same-day exchange rate for non-USD currencies.
+    columns:
+      - name: invoice_id
+        description: "{{ doc('invoice_id') }}"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: account_id
+        description: "{{ doc('account_id') }}"
+        data_tests:
+          - relationships:
+              to: ref('int_account')
+              field: account_id
+
+      - name: subscription_id
+        description: "{{ doc('subscription_id') }}"
+        data_tests:
+          - relationships:
+              to: ref('int_subscription_priced')
+              field: subscription_id
+
+      - name: amount
+        description: Invoice amount in the original currency (see currency).
+
+      - name: amount_usd
+        description: amount converted to USD.
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: false
+
+      - name: currency
+        description: Currency of this invoice. Not all invoices are in USD.
+
+      - name: invoice_status
+        description: "Invoice status: paid, pending, failed."
+
+      - name: invoice_date
+        description: Date the invoice was raised.
+
+      - name: paid_at
+        description: When the invoice was paid. Null if not yet paid.
+
+      - name: is_missing_fx_rate
+        description: >
+          True if this is a non-USD invoice for which no same-day exchange
+          rate could be found (amount_usd would be null in that case).
+          Should always be false against the provided sample data - this
+          test exists to catch the issue immediately if a future load has
+          gaps in raw_exchange_rates.
+        data_tests:
+          - accepted_values:
+              values: [false]

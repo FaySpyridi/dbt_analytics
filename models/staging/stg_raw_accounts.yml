@@ -1,0 +1,36 @@
+models:
+  - name: stg_raw_accounts
+    description: Represents companies that have signed up to Yodeck.
+
+    columns:
+      - name: account_id
+        data_type: string
+        description: "{{ doc('account_id') }}"
+        data_tests:
+          - not_null
+          - unique
+
+      - name: account_name
+        data_type: string
+        description: "{{ doc('account_name') }}"
+
+      - name: country_code
+        data_type: string
+        description: "{{ doc('country_code') }}"
+
+      - name: account_created_at
+        data_type: timestamp
+        description: When the account was first created in the system
+
+      - name: account_status
+        data_type: string
+        description: Current account status: active, cancelled, trial
+        data_tests:
+          - accepted_values:
+              name: accepted_values_stg_raw_accounts_account_status
+              description: >
+                Accepted values on account_status. We want to be informed
+                if a new status is created in order to check if we should
+                adjust our reports.
+              arguments:
+                values: ["active", "cancelled", "trial"]

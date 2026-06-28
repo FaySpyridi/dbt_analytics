@@ -1,0 +1,39 @@
+models:
+  - name: int_account_monthly_mrr
+    description: >
+      Account-month grain: total MRR for an account as of the end of each
+      month, summing all subscriptions that were active (per
+      int_subscription_priced) on that month's last day. Overlapping
+      active subscriptions on the same account are summed, not
+      de-duplicated (see README).
+    columns:
+      - name: account_id
+        description: "{{ doc('account_id') }}"
+        data_tests:
+          - not_null
+
+      - name: month_start
+        description: First day of the month this snapshot applies to.
+        data_tests:
+          - not_null
+
+      - name: month_end
+        description: Last day of the month this snapshot applies to.
+        data_tests:
+          - not_null
+
+      - name: total_mrr
+        description: Total MRR for this account at the end of this month.
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+
+      - name: active_subscription_count
+        description: Number of distinct subscriptions contributing to total_mrr for this account in this month.
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - account_id
+            - month_start

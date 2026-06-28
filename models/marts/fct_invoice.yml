@@ -1,0 +1,36 @@
+models:
+  - name: fct_invoice
+    description: Gold layer invoice-grain fact, USD-converted. One row per invoice.
+    columns:
+      - name: invoice_id
+        description: Unique identifier for the invoice. Primary key.
+        data_tests:
+          - unique
+          - not_null
+
+      - name: account_id
+        description: "{{ doc('account_id') }}"
+
+      - name: subscription_id
+        description: "{{ doc('subscription_id') }}"
+
+      - name: amount
+        description: Invoice amount in the original currency.
+
+      - name: currency
+        description: Currency of this invoice. Not all invoices are in USD.
+
+      - name: amount_usd
+        description: amount converted to USD.
+
+      - name: invoice_status
+        description: "Invoice status: paid, pending, failed."
+
+      - name: invoice_date
+        description: Date the invoice was raised.
+
+      - name: paid_at
+        description: When the invoice was paid. Null if not yet paid.
+
+      - name: is_failed
+        description: True when invoice_status = 'failed'.
